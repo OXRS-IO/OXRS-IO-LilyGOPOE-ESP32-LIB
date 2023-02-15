@@ -353,40 +353,40 @@ void ethernetEvent(WiFiEvent_t event)
   switch (event)
   {
     case ARDUINO_EVENT_ETH_START:
-      logger.println(F("[lily] ethernet started"));
+      _logger.println(F("[lily] ethernet started"));
 
       // Get the ethernet MAC address and display on serial
       byte mac[6];
       char mac_display[18];
       ETH.macAddress(mac);
       sprintf_P(mac_display, PSTR("%02X:%02X:%02X:%02X:%02X:%02X"), mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-      logger.print(F("[lily] mac address: "));
-      logger.println(mac_display);
+      _logger.print(F("[lily] mac address: "));
+      _logger.println(mac_display);
 
       // Set up MQTT (don't attempt to connect yet)
       _initialiseMqtt(mac);
       break;
 
     case ARDUINO_EVENT_ETH_GOT_IP:
-      logger.println(F("[lily] ethernet connected"));
+      _logger.println(F("[lily] ethernet connected"));
       _ethConnected = true;
 
       // Get the IP address assigned by DHCP and display on serial
       IPAddress ip = ETH.localIP();
-      logger.print(F("[lily] ip address: "));
-      logger.println(ip);
+      _logger.print(F("[lily] ip address: "));
+      _logger.println(ip);
 
       // Set up the REST API once we have an IP address
       _initialiseRestApi();
       break;
 
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-      logger.println(F("[lily] ethernet disconnected"));
+      _logger.println(F("[lily] ethernet disconnected"));
       _ethConnected = false;
       break;
 
     case ARDUINO_EVENT_ETH_STOP:
-      logger.println(F("[lily] ethernet stopped"));
+      _logger.println(F("[lily] ethernet stopped"));
       _ethConnected = false;
       break;
 
