@@ -246,6 +246,88 @@ void _mqttCallback(char * topic, byte * payload, int length)
   }
 }
 
+void _initialiseMqtt(byte * mac)
+{
+  // NOTE: this must be called *before* initialising the REST API since
+  //       that will load MQTT config from file, which has precendence
+
+  // Set the default client ID to last 3 bytes of the MAC address
+  char clientId[32];
+  sprintf_P(clientId, PSTR("%02x%02x%02x"), mac[3], mac[4], mac[5]);  
+  _mqtt.setClientId(clientId);
+  
+  // Register our callbacks
+  _mqtt.onConnected(_mqttConnected);
+  _mqtt.onDisconnected(_mqttDisconnected);
+  _mqtt.onConfig(_mqttConfig);
+  _mqtt.onCommand(_mqttCommand);
+  
+  // Start listening for MQTT messages
+  _mqttClient.setCallback(_mqttCallback);
+}
+
+void _initialiseRestApi(void)
+{
+  // NOTE: this must be called *after* initialising MQTT since that sets
+  //       the default client id, which has lower precendence than MQTT
+  //       settings stored in file and loaded by the API
+
+  // Set up the REST API
+  _api.begin();
+  
+  // Register our callbacks
+  _api.onAdopt(_apiAdopt);
+
+  // Start listening
+  _server.begin();
+}
+
+void ethernetEvent(WiFiEvent_t event)
+{
+  // Log the event to serial for debugging
+  switch (event)
+  {
+    case ARDUINO_EVENT_ETH_START:
+      _logger.println(F("[lily] ethernet started"));
+
+      // Get the ethernet MAC address and display on serial
+      byte mac[6];
+      char mac_display[18];
+      ETH.macAddress(mac);
+      sprintf_P(mac_display, PSTR("%02X:%02X:%02X:%02X:%02X:%02X"), mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+      _logger.print(F("[lily] mac address: "));
+      _logger.println(mac_display);
+
+      // Set up MQTT (don't attempt to connect yet)
+      _initialiseMqtt(mac);
+      break;
+
+    case ARDUINO_EVENT_ETH_GOT_IP:
+      _logger.println(F("[lily] ethernet connected"));
+      _ethConnected = true;
+
+      // Get the IP address assigned by DHCP and display on serial
+      IPAddress ip = ETH.localIP();
+      _logger.print(F("[lily] ip address: "));
+      _logger.println(ip);
+
+      // Set up the REST API once we have an IP address
+      _initialiseRestApi();
+      break;
+
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
+      _logger.println(F("[lily] ethernet disconnected"));
+      _ethConnected = false;
+      break;
+
+    case ARDUINO_EVENT_ETH_STOP:
+      _logger.println(F("[lily] ethernet stopped"));
+      _ethConnected = false;
+      break;
+
+  }
+}
+
 /* Main program */
 void OXRS_LILYGOPOE::setMqttBroker(const char * broker, uint16_t port)
 {
@@ -347,52 +429,6 @@ size_t OXRS_LILYGOPOE::write(uint8_t character)
   return _logger.write(character);
 }
 
-void ethernetEvent(WiFiEvent_t event)
-{
-  // Log the event to serial for debugging
-  switch (event)
-  {
-    case ARDUINO_EVENT_ETH_START:
-      _logger.println(F("[lily] ethernet started"));
-
-      // Get the ethernet MAC address and display on serial
-      byte mac[6];
-      char mac_display[18];
-      ETH.macAddress(mac);
-      sprintf_P(mac_display, PSTR("%02X:%02X:%02X:%02X:%02X:%02X"), mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-      _logger.print(F("[lily] mac address: "));
-      _logger.println(mac_display);
-
-      // Set up MQTT (don't attempt to connect yet)
-      _initialiseMqtt(mac);
-      break;
-
-    case ARDUINO_EVENT_ETH_GOT_IP:
-      _logger.println(F("[lily] ethernet connected"));
-      _ethConnected = true;
-
-      // Get the IP address assigned by DHCP and display on serial
-      IPAddress ip = ETH.localIP();
-      _logger.print(F("[lily] ip address: "));
-      _logger.println(ip);
-
-      // Set up the REST API once we have an IP address
-      _initialiseRestApi();
-      break;
-
-    case ARDUINO_EVENT_ETH_DISCONNECTED:
-      _logger.println(F("[lily] ethernet disconnected"));
-      _ethConnected = false;
-      break;
-
-    case ARDUINO_EVENT_ETH_STOP:
-      _logger.println(F("[lily] ethernet stopped"));
-      _ethConnected = false;
-      break;
-
-  }
-}
-
 void OXRS_LILYGOPOE::_initialiseNetwork()
 {
   // We continue initialisation inside this event handler
@@ -410,42 +446,6 @@ void OXRS_LILYGOPOE::_initialiseNetwork()
 
   // Start the Ethernet PHY and wait for events
   ETH.begin(ETH_PHY_ADDR, ETH_PHY_POWER, ETH_PHY_MDC, ETH_PHY_MDIO, ETH_PHY_TYPE, ETH_CLOCK_MODE);
-}
-
-void OXRS_LILYGOPOE::_initialiseMqtt(byte * mac)
-{
-  // NOTE: this must be called *before* initialising the REST API since
-  //       that will load MQTT config from file, which has precendence
-
-  // Set the default client ID to last 3 bytes of the MAC address
-  char clientId[32];
-  sprintf_P(clientId, PSTR("%02x%02x%02x"), mac[3], mac[4], mac[5]);  
-  _mqtt.setClientId(clientId);
-  
-  // Register our callbacks
-  _mqtt.onConnected(_mqttConnected);
-  _mqtt.onDisconnected(_mqttDisconnected);
-  _mqtt.onConfig(_mqttConfig);
-  _mqtt.onCommand(_mqttCommand);
-  
-  // Start listening for MQTT messages
-  _mqttClient.setCallback(_mqttCallback);
-}
-
-void OXRS_LILYGOPOE::_initialiseRestApi(void)
-{
-  // NOTE: this must be called *after* initialising MQTT since that sets
-  //       the default client id, which has lower precendence than MQTT
-  //       settings stored in file and loaded by the API
-
-  // Set up the REST API
-  _api.begin();
-  
-  // Register our callbacks
-  _api.onAdopt(_apiAdopt);
-
-  // Start listening
-  _server.begin();
 }
 
 boolean OXRS_LILYGOPOE::_isNetworkConnected(void)

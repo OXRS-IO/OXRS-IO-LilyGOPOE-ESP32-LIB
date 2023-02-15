@@ -56,9 +56,7 @@ class OXRS_LILYGOPOE : public Print
 
   private:
     void _initialiseNetwork(void);
-    void _initialiseMqtt(byte * mac);
-    void _initialiseRestApi(void);
-
+    
     boolean _isNetworkConnected(void);
 };
 
