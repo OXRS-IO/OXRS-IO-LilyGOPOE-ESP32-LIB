@@ -307,9 +307,8 @@ void ethernetEvent(WiFiEvent_t event)
       _ethConnected = true;
 
       // Get the IP address assigned by DHCP and display on serial
-      //IPAddress ip = ETH.localIP();
-      //_logger.print(F("[lily] ip address: "));
-      //_logger.println(ip);
+      _logger.print(F("[lily] ip address: "));
+      _logger.println(ETH.localIP());
 
       // Set up the REST API once we have an IP address
       _initialiseRestApi();
