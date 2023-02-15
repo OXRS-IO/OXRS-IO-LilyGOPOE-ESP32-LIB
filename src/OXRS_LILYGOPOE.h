@@ -55,7 +55,7 @@ class OXRS_LILYGOPOE : public Print
     using Print::write;
 
   private:
-    void _initialiseNetwork(byte * mac);
+    void _initialiseNetwork(void);
     void _initialiseMqtt(byte * mac);
     void _initialiseRestApi(void);
 
