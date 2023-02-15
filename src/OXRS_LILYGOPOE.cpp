@@ -318,7 +318,7 @@ void OXRS_LILYGOPOE::setCommandSchema(JsonVariant json)
 }
 
 void OXRS_LILYGOPOE::apiGet(const char * path, Router::Middleware * middleware)
-{]
+{
   _api.get(path, middleware);
 }
 
