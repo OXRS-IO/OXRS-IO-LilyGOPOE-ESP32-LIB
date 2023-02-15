@@ -284,17 +284,20 @@ void _initialiseRestApi(void)
 
 void ethernetEvent(WiFiEvent_t event)
 {
+  byte mac[6];
+  char mac_display[18];
+
   // Log the event to serial for debugging
   switch (event)
   {
     case ARDUINO_EVENT_ETH_START:
       _logger.println(F("[lily] ethernet started"));
 
-      // Get the ethernet MAC address and display on serial
-      byte mac[6];
-      char mac_display[18];
+      // Get the ethernet MAC address
       ETH.macAddress(mac);
       sprintf_P(mac_display, PSTR("%02X:%02X:%02X:%02X:%02X:%02X"), mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+      // Display MAC address on serial
       _logger.print(F("[lily] mac address: "));
       _logger.println(mac_display);
 
@@ -306,7 +309,7 @@ void ethernetEvent(WiFiEvent_t event)
       _logger.println(F("[lily] ethernet connected"));
       _ethConnected = true;
 
-      // Get the IP address assigned by DHCP and display on serial
+      // Display IP address on serial
       _logger.print(F("[lily] ip address: "));
       _logger.println(ETH.localIP());
 
