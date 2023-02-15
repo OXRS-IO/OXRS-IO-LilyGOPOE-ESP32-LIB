@@ -5,9 +5,9 @@
 #include "Arduino.h"
 #include "OXRS_LILYGOPOE.h"
 
+#include <WiFi.h>                     // For networking
 #include <ETH.h>                      // For networking
 #include <SPI.h>                      // For ethernet
-#include <WiFi.h>                     // For networking
 #include <LittleFS.h>                 // For file system access
 #include <MqttLogger.h>               // For logging
 
@@ -287,7 +287,7 @@ void ethernetEvent(WiFiEvent_t event)
   // Log the event to serial for debugging
   switch (event)
   {
-    case ETHERNET_EVENT_START:
+    case ARDUINO_EVENT_ETH_START:
       _logger.println(F("[lily] ethernet started"));
 
       // Get the ethernet MAC address and display on serial
@@ -302,7 +302,7 @@ void ethernetEvent(WiFiEvent_t event)
       _initialiseMqtt(mac);
       break;
 
-    case IP_EVENT_ETH_GOT_IP:
+    case ARDUINO_EVENT_ETH_GOT_IP:
       _logger.println(F("[lily] ethernet connected"));
       _ethConnected = true;
 
@@ -315,12 +315,12 @@ void ethernetEvent(WiFiEvent_t event)
       _initialiseRestApi();
       break;
 
-    case ETHERNET_EVENT_DISCONNECTED:
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
       _logger.println(F("[lily] ethernet disconnected"));
       _ethConnected = false;
       break;
 
-    case ETHERNET_EVENT_STOP:
+    case ARDUINO_EVENT_ETH_STOP:
       _logger.println(F("[lily] ethernet stopped"));
       _ethConnected = false;
       break;
