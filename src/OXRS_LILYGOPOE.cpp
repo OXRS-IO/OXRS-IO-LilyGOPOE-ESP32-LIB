@@ -287,7 +287,7 @@ void ethernetEvent(WiFiEvent_t event)
   // Log the event to serial for debugging
   switch (event)
   {
-    case ARDUINO_EVENT_ETH_START:
+    case ETHERNET_EVENT_START:
       _logger.println(F("[lily] ethernet started"));
 
       // Get the ethernet MAC address and display on serial
@@ -302,7 +302,7 @@ void ethernetEvent(WiFiEvent_t event)
       _initialiseMqtt(mac);
       break;
 
-    case ARDUINO_EVENT_ETH_GOT_IP:
+    case IP_EVENT_ETH_GOT_IP:
       _logger.println(F("[lily] ethernet connected"));
       _ethConnected = true;
 
@@ -315,12 +315,12 @@ void ethernetEvent(WiFiEvent_t event)
       _initialiseRestApi();
       break;
 
-    case ARDUINO_EVENT_ETH_DISCONNECTED:
+    case ETHERNET_EVENT_DISCONNECTED:
       _logger.println(F("[lily] ethernet disconnected"));
       _ethConnected = false;
       break;
 
-    case ARDUINO_EVENT_ETH_STOP:
+    case ETHERNET_EVENT_STOP:
       _logger.println(F("[lily] ethernet stopped"));
       _ethConnected = false;
       break;
