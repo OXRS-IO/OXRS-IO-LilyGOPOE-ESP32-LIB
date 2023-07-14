@@ -497,9 +497,7 @@ bool OXRS_LILYGOPOE::publishHassDiscovery(JsonVariant json, char * component, ch
     json = json.to<JsonObject>();
   }
 
-  bool success = _mqtt.publish(json, topic, true);
-  if (success) { _screen.triggerMqttTxLed(); }
-  return success;
+  return _mqtt.publish(json, topic, true);
 }
 
 size_t OXRS_LILYGOPOE::write(uint8_t character)
