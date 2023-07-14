@@ -451,12 +451,12 @@ boolean OXRS_LILYGOPOE::publishTelemetry(JsonVariant json)
   return _mqtt.publishTelemetry(json);
 }
 
-bool OXRS_Rack32::isHassDiscoveryEnabled()
+bool OXRS_LILYGOPOE::isHassDiscoveryEnabled()
 {
   return g_hassDiscoveryEnabled;
 }
 
-void OXRS_Rack32::getHassDiscoveryJson(JsonVariant json, char * id, bool isTelemetry)
+void OXRS_LILYGOPOE::getHassDiscoveryJson(JsonVariant json, char * id, bool isTelemetry)
 {
   char uniqueId[64];
   sprintf_P(uniqueId, PSTR("%s_%s"), _mqtt.getClientId(), id);
@@ -478,7 +478,7 @@ void OXRS_Rack32::getHassDiscoveryJson(JsonVariant json, char * id, bool isTelem
   ids.add(_mqtt.getClientId());
 }
 
-bool OXRS_Rack32::publishHassDiscovery(JsonVariant json, char * component, char * id)
+bool OXRS_LILYGOPOE::publishHassDiscovery(JsonVariant json, char * component, char * id)
 {
   // Exit early if Home Assistant discovery has been disabled
   if (!g_hassDiscoveryEnabled) { return false; }
