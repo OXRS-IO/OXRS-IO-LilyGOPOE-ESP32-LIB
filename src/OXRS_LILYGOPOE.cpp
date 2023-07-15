@@ -456,48 +456,25 @@ bool OXRS_LILYGOPOE::isHassDiscoveryEnabled()
   return g_hassDiscoveryEnabled;
 }
 
-void OXRS_LILYGOPOE::getHassDiscoveryJson(JsonVariant json, char * id, bool isTelemetry)
+void OXRS_LILYGOPOE::getHassDiscoveryJson(JsonVariant json, char * id)
 {
-  char uniqueId[64];
-  sprintf_P(uniqueId, PSTR("%s_%s"), _mqtt.getClientId(), id);
-  json["uniq_id"] = uniqueId;
-  json["obj_id"] = uniqueId;
+  _mqtt.getHassDiscoveryJson(json, id);
 
-  char topic[64];
-  json["stat_t"] = isTelemetry ? _mqtt.getTelemetryTopic(topic) : _mqtt.getStatusTopic(topic);
-  json["avty_t"] = _mqtt.getLwtTopic(topic);
-  json["avty_tpl"] = "{% if value_json.online == true %}online{% else %}offline{% endif %}";
-
-  JsonObject dev = json.createNestedObject("dev");
-  dev["name"] = _mqtt.getClientId();
-  dev["mf"] = FW_MAKER;
-  dev["mdl"] = FW_NAME;
-  dev["sw"] = STRINGIFY(FW_VERSION);
-
-  JsonArray ids = dev.createNestedArray("ids");
-  ids.add(_mqtt.getClientId());
+  // Update the firmware details
+  json["dev"]["mf"] = FW_MAKER;
+  json["dev"]["mdl"] = FW_NAME;
+  json["dev"]["sw"] = STRINGIFY(FW_VERSION);
+  json["dev"]["hw"] = "LilyGO POE ETH";
 }
 
 bool OXRS_LILYGOPOE::publishHassDiscovery(JsonVariant json, char * component, char * id)
 {
-  // Exit early if Home Assistant discovery has been disabled
-  if (!g_hassDiscoveryEnabled) { return false; }
+  // Exit early if Home Assistant discovery not enabled
+  if (!_hassDiscoveryEnabled) { return false; }
 
   // Exit early if no network connection
   if (!_isNetworkConnected()) { return false; }
-
-  // Build the discovery topic
-  char topic[64];
-  sprintf_P(topic, PSTR("%s/%s/%s/%s/config"), g_hassDiscoveryTopicPrefix, component, _mqtt.getClientId(), id);
-
-  // Check for a null payload and ensure we send an empty JSON object
-  // to clear any existing Home Assistant config
-  if (json.isNull())
-  {
-    json = json.to<JsonObject>();
-  }
-
-  return _mqtt.publish(json, topic, true);
+  return _mqtt.publishHassDiscovery(json, component, id);
 }
 
 size_t OXRS_LILYGOPOE::write(uint8_t character)
