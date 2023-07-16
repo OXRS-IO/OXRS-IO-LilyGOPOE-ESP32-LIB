@@ -42,7 +42,6 @@ jsonCallback _onCommand;
 
 // Home Assistant self-discovery
 bool g_hassDiscoveryEnabled = false;
-char g_hassDiscoveryTopicPrefix[64] = "homeassistant";
 
 /* JSON helpers */
 void _mergeJson(JsonVariant dst, JsonVariantConst src)
@@ -232,7 +231,7 @@ void _mqttConfig(JsonVariant json)
 
   if (json.containsKey("hassDiscoveryTopicPrefix"))
   {
-    strcpy(g_hassDiscoveryTopicPrefix, json["hassDiscoveryTopicPrefix"]);
+    _mqtt.setHassDiscoveryTopicPrefix(json["hassDiscoveryTopicPrefix"]);
   }
 
   // Pass on to the firmware callback
@@ -357,31 +356,6 @@ void ethernetEvent(WiFiEvent_t event)
 }
 
 /* Main program */
-void OXRS_LILYGOPOE::setMqttBroker(const char * broker, uint16_t port)
-{
-  _mqtt.setBroker(broker, port);
-}
-
-void OXRS_LILYGOPOE::setMqttClientId(const char * clientId)
-{
-  _mqtt.setClientId(clientId);
-}
-
-void OXRS_LILYGOPOE::setMqttAuth(const char * username, const char * password)
-{
-  _mqtt.setAuth(username, password);
-}
-
-void OXRS_LILYGOPOE::setMqttTopicPrefix(const char * prefix)
-{
-  _mqtt.setTopicPrefix(prefix);
-}
-
-void OXRS_LILYGOPOE::setMqttTopicSuffix(const char * suffix)
-{
-  _mqtt.setTopicSuffix(suffix);
-}
-
 void OXRS_LILYGOPOE::begin(jsonCallback config, jsonCallback command)
 {
   // Get our firmware details
@@ -427,16 +401,6 @@ void OXRS_LILYGOPOE::setCommandSchema(JsonVariant json)
   _mergeJson(_fwCommandSchema.as<JsonVariant>(), json);
 }
 
-void OXRS_LILYGOPOE::apiGet(const char * path, Router::Middleware * middleware)
-{
-  _api.get(path, middleware);
-}
-
-void OXRS_LILYGOPOE::apiPost(const char * path, Router::Middleware * middleware)
-{
-  _api.post(path, middleware);
-}
-
 boolean OXRS_LILYGOPOE::publishStatus(JsonVariant json)
 {
   // Exit early if no network connection
@@ -470,7 +434,7 @@ void OXRS_LILYGOPOE::getHassDiscoveryJson(JsonVariant json, char * id)
 bool OXRS_LILYGOPOE::publishHassDiscovery(JsonVariant json, char * component, char * id)
 {
   // Exit early if Home Assistant discovery not enabled
-  if (!_hassDiscoveryEnabled) { return false; }
+  if (!g_hassDiscoveryEnabled) { return false; }
 
   // Exit early if no network connection
   if (!_isNetworkConnected()) { return false; }
