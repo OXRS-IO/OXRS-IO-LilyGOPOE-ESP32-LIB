@@ -401,6 +401,16 @@ void OXRS_LILYGOPOE::setCommandSchema(JsonVariant json)
   _mergeJson(_fwCommandSchema.as<JsonVariant>(), json);
 }
 
+OXRS_MQTT * OXRS_LILYGOPOE::getMQTT()
+{
+  return &_mqtt;
+}
+
+OXRS_API * OXRS_LILYGOPOE::getAPI()
+{
+  return &_api;
+}
+
 boolean OXRS_LILYGOPOE::publishStatus(JsonVariant json)
 {
   // Exit early if no network connection
