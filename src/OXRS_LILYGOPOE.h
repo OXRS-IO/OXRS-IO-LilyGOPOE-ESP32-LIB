@@ -44,11 +44,6 @@ class OXRS_LILYGOPOE : public Print
     boolean publishStatus(JsonVariant json);
     boolean publishTelemetry(JsonVariant json);
 
-    // Helpers for Home Assistant discovery
-    bool isHassDiscoveryEnabled();
-    void getHassDiscoveryJson(JsonVariant json, char * id);
-    bool publishHassDiscovery(JsonVariant json, char * component, char * id);
-
     // Implement Print.h wrapper
     virtual size_t write(uint8_t);
     using Print::write;
